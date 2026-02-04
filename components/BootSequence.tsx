@@ -17,7 +17,7 @@ const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
     try {
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      
+
       const oscillator = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
 
@@ -50,7 +50,7 @@ const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
       // Dynamic delay: longer pause after philosophical lines
       const line = BOOT_SEQUENCE[index];
       const delay = line === "" ? 400 : (line.includes("---") ? 600 : Math.random() * 150 + 50);
-      
+
       const timeout = setTimeout(() => {
         setVisibleLines(prev => [...prev, BOOT_SEQUENCE[index]]);
         setIndex(prev => prev + 1);
@@ -97,22 +97,22 @@ const BootSequence: React.FC<BootSequenceProps> = ({ onComplete }) => {
           {line || <br />}
         </div>
       ))}
-      
+
       {initStarted && (
         <div className="mt-8 border-t-2 border-[#33FF00] pt-6 animate-in fade-in zoom-in duration-700 pb-12">
           <div className="text-2xl mb-4 italic">"The future is offline. Reclaim your focus."</div>
-          <button 
+          <button
             onClick={() => { playBeep(600, 0.1); onComplete(); }}
             className="border-4 border-[#33FF00] px-8 py-3 bg-[#33FF00] text-black font-black text-2xl animate-pulse hover:bg-black hover:text-[#33FF00] transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(51,255,0,0.5)]"
           >
-            > TAKE THE RED PILL [Y]
+            &gt; TAKE THE RED PILL [Y]
           </button>
           <p className="mt-6 text-sm opacity-60 tracking-widest">
             SESSION_ESTABLISHED: COGNITIVE_PURGE_READY_0.4.2
           </p>
         </div>
       )}
-      
+
       {!initStarted && (
         <div className="mt-4 opacity-40 text-sm animate-pulse sticky bottom-0 bg-black py-2">
           [ READING SYSTEM MANIFESTO... PRESS Y TO SKIP ]

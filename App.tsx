@@ -44,7 +44,7 @@ const App: React.FC = () => {
   return (
     <div className="h-screen w-screen bg-black text-[#33FF00] p-2 md:p-4 selection:bg-[#33FF00] selection:text-black crt-content overflow-hidden flex flex-col">
       <div className="flex-1 border-2 border-[#33FF00] p-4 md:p-6 flex flex-col relative shadow-[0_0_50px_rgba(51,255,0,0.1)] overflow-hidden">
-        
+
         <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
           {currentView === 'BOOT' && <BootSequence onComplete={() => setCurrentView('MAIN')} />}
           {currentView === 'MAIN' && <MainMenu onNavigate={navigate} />}
@@ -62,7 +62,7 @@ const App: React.FC = () => {
           <footer className="mt-4 pt-2 font-mono border-t border-[#33FF00]/30 text-xs shrink-0">
             <div className="flex justify-between items-end">
               <div className="opacity-80">
-                <span className="bg-[#33FF00] text-black px-1 font-bold mr-2">C:\LEGACY_OS></span>
+                <span className="bg-[#33FF00] text-black px-1 font-bold mr-2">C:\LEGACY_OS&gt;</span>
                 <span className="hidden sm:inline">CMD: CONTACT_US | VOICE: 555-0100 | MAIL: PO BOX 1984</span>
                 <span className="sm:hidden">CMD: CONTACT_US</span>
               </div>
