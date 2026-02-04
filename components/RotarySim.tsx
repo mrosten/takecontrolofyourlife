@@ -126,9 +126,16 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     return deg;
   };
 
+  // State refs for smooth dragging beyond 180 degrees
+  const lastAngleRef = useRef(0);
+  const currentRotationRef = useRef(0);
+
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent, digit: number) => {
     initAudio();
     const currentAngle = getPointerAngle(e);
+    lastAngleRef.current = currentAngle;
+    currentRotationRef.current = 0;
+
     // Digit 0 needs highest rotation.
     // 1 is closest (~60deg), 0 is furthest (~300deg+).
     // Using a simpler formula to be forgiving
@@ -143,16 +150,21 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       e.preventDefault();
 
       const angle = getPointerAngle(e);
-      let diff = angle - dragState.startAngle;
+      let delta = angle - lastAngleRef.current;
 
-      // Robust wrap handling
-      while (diff < -180) diff += 360;
-      while (diff > 180) diff -= 360;
+      // Robust wrap handling for continuous rotation tracking
+      if (delta < -180) delta += 360;
+      if (delta > 180) delta -= 360;
 
-      if (diff < 0) diff = 0; // No backward drag
-      if (diff > dragState.maxRotation) diff = dragState.maxRotation;
+      lastAngleRef.current = angle;
 
-      setRotation(diff);
+      let newRot = currentRotationRef.current + delta;
+
+      if (newRot < 0) newRot = 0; // No backward drag
+      if (newRot > dragState.maxRotation) newRot = dragState.maxRotation;
+
+      currentRotationRef.current = newRot;
+      setRotation(newRot);
     };
 
     const handleUp = () => {
@@ -173,6 +185,7 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       }
       setDragState(prev => ({ ...prev, active: false, digit: null }));
       setRotation(0);
+      currentRotationRef.current = 0;
     };
 
     window.addEventListener('mousemove', handleMove);
