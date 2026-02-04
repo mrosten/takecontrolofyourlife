@@ -306,7 +306,7 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       </div>
 
       {/* Main Dial Container - Fixed Aspect Ratio */}
-      <div className="relative w-[320px] aspect-square rounded-full flex items-center justify-center" ref={dialRef}>
+      <div className="relative w-[320px] aspect-square rounded-full flex items-center justify-center" ref={dialRef} style={{ touchAction: 'none' }}>
 
         {/* Backplate (Static Numbers) */}
         <div className="absolute inset-0 rounded-full border-4 border-[#33FF00]/30 bg-[#050505] shadow-[inset_0_0_20px_rgba(51,255,0,0.1)]">
