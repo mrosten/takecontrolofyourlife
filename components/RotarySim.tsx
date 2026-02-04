@@ -84,7 +84,6 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         handleAiResponse([], "HELLO", entry.persona);
       }, 2500);
     } else {
-      // Busy signal logic could go here
       setNumber("DISCONNECTED");
       setTimeout(() => setNumber(""), 2000);
     }
@@ -104,11 +103,7 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const submitMessage = () => {
     if (!userInput.trim() || isAiTyping) return;
     const msg = userInput;
-    setUserInput(''); // clear early
-    // Optimistic user add
-    // actually chatHistory updates in handleAiResponse for simplicity in this proto
-    // but we can render user message immediately if we split state.
-    // simpler: pass current history + new msg
+    setUserInput('');
     handleAiResponse(chatHistory, msg, currentPersona.persona);
   };
 
@@ -134,7 +129,11 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent, digit: number) => {
     initAudio();
     const currentAngle = getPointerAngle(e);
-    const maxRot = 60 + ((digit === 0 ? 10 : digit) - 1) * 30;
+    // Digit 0 needs highest rotation.
+    // 1 is closest (~60deg), 0 is furthest (~300deg+).
+    // Using a simpler formula to be forgiving
+    const maxRot = 55 + ((digit === 0 ? 10 : digit) - 1) * 30;
+
     setDragState({ active: true, digit, startAngle: currentAngle, maxRotation: maxRot });
   };
 
@@ -142,26 +141,34 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const handleMove = (e: MouseEvent | TouchEvent) => {
       if (!dragState.active) return;
       e.preventDefault();
-      let angle = getPointerAngle(e);
+
+      const angle = getPointerAngle(e);
       let diff = angle - dragState.startAngle;
-      if (diff < -180) diff += 360;
-      if (diff > 180) diff -= 360;
-      if (diff < 0) diff = 0;
+
+      // Robust wrap handling
+      while (diff < -180) diff += 360;
+      while (diff > 180) diff -= 360;
+
+      if (diff < 0) diff = 0; // No backward drag
       if (diff > dragState.maxRotation) diff = dragState.maxRotation;
+
       setRotation(diff);
     };
 
     const handleUp = () => {
       if (!dragState.active) return;
-      if (rotation > dragState.maxRotation * 0.9 && dragState.digit !== null) {
+
+      // Verification logic: did we rotate enough?
+      const threshold = Math.max(dragState.maxRotation * 0.85, 30);
+
+      if (rotation > threshold && dragState.digit !== null) {
         const newNum = (number + dragState.digit.toString()).slice(-10);
         setNumber(newNum);
         playTone(dragState.digit);
 
-        // Auto-dial check
         const match = DIRECTORY.find(d => d.number === newNum);
         if (match || newNum === "0") {
-          setTimeout(() => tryConnect(newNum), 1000); // Connect after delay
+          setTimeout(() => tryConnect(newNum), 1000);
         }
       }
       setDragState(prev => ({ ...prev, active: false, digit: null }));
@@ -178,17 +185,18 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       window.removeEventListener('touchmove', handleMove);
       window.removeEventListener('touchend', handleUp);
     };
-  }, [dragState, rotation, playTone, playClick, number]);
+  }, [dragState, rotation, number]);
 
   // Render Helpers
   const renderDialNumbers = () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((n, i) => (
-    <div key={n} className="absolute w-12 h-12 flex items-center justify-center font-bold text-xl text-[#33FF00]"
+    <div key={n} className="absolute w-12 h-12 flex items-center justify-center font-bold text-xl text-[#33FF00] pointer-events-none"
       style={{ transform: `rotate(${-60 - (i * 30)}deg) translate(110px) rotate(${60 + (i * 30)}deg)`, left: 'calc(50% - 24px)', top: 'calc(50% - 24px)' }}>{n}</div>
   ));
+
   const renderHoles = () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((n, i) => (
     <div key={n} onMouseDown={(e) => handleMouseDown(e, n)} onTouchStart={(e) => handleMouseDown(e, n)}
-      className="absolute w-14 h-14 rounded-full border-2 border-[#33FF00] bg-black/50 cursor-pointer hover:bg-[#33FF00]/20 active:bg-[#33FF00]/40 transition-colors"
-      style={{ transform: `rotate(${-60 - (i * 30)}deg) translate(110px) rotate(${60 + (i * 30)}deg)`, left: 'calc(50% - 28px)', top: 'calc(50% - 28px)', cursor: dragState.active ? 'grabbing' : 'grab' }}></div>
+      className="absolute w-14 h-14 rounded-full border-2 border-[#33FF00] bg-black/40 cursor-grab active:cursor-grabbing hover:bg-[#33FF00]/10 transition-colors backdrop-blur-[1px]"
+      style={{ transform: `rotate(${-60 - (i * 30)}deg) translate(110px) rotate(${60 + (i * 30)}deg)`, left: 'calc(50% - 28px)', top: 'calc(50% - 28px)' }}></div>
   ));
 
   // --- Views ---
@@ -284,16 +292,26 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         </div>
       </div>
 
-      <div className="relative w-[320px] h-[320px]" ref={dialRef}>
-        <div className="absolute inset-0 rounded-full border-4 border-[#33FF00]/30 bg-[#050505]">
+      {/* Main Dial Container - Fixed Aspect Ratio */}
+      <div className="relative w-[320px] aspect-square rounded-full flex items-center justify-center" ref={dialRef}>
+
+        {/* Backplate (Static Numbers) */}
+        <div className="absolute inset-0 rounded-full border-4 border-[#33FF00]/30 bg-[#050505] shadow-[inset_0_0_20px_rgba(51,255,0,0.1)]">
           {renderDialNumbers()}
-          <div className="absolute top-[50%] right-[10px] w-12 h-4 bg-[#33FF00] transform rotate-45 origin-left z-20 shadow-[0_0_10px_#33SS00]"></div>
+          <div className="absolute top-[50%] right-[10px] w-12 h-4 bg-[#33FF00] transform rotate-45 origin-left z-20 shadow-[0_0_10px_#33SS00] pointer-events-none"></div>
         </div>
+
+        {/* Stationary Center Cap (The 'Rectangular thing' that is now actually round and static) */}
+        <div className="absolute w-32 h-32 rounded-full border-2 border-[#33FF00] bg-black flex items-center justify-center p-2 text-center z-20 pointer-events-none shadow-[0_0_15px_rgba(51,255,0,0.3)]">
+          <span className="text-[10px] text-[#33FF00]/50 leading-tight">PROPERTY OF<br />LEGACY_OS<br />DO NOT REMOVE</span>
+        </div>
+
+        {/* Rotating Dial (The Holes) */}
         <div className="absolute inset-0 rounded-full border-4 border-[#33FF00] z-10 ease-out"
-          style={{ transform: `rotate(${rotation}deg)`, transition: dragState.active ? 'none' : 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)' }}>
-          <div className="absolute inset-0 m-auto w-32 h-32 rounded-full border-2 border-[#33FF00] bg-black flex items-center justify-center p-2 text-center pointer-events-none">
-            <span className="text-[10px] text-[#33FF00]/50 leading-tight">PROPERTY OF<br />LEGACY_OS<br />DO NOT REMOVE</span>
-          </div>
+          style={{
+            transform: `rotate(${rotation}deg)`,
+            transition: dragState.active ? 'none' : 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)'
+          }}>
           <div className="w-full h-full relative">{renderHoles()}</div>
         </div>
       </div>
