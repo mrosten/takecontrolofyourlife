@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HARD RESET - Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'VT323', monospace;
+            height: 100vh;
+        }
+
+        #root {
+            height: 100%;
+        }
+
+        /* CRT Scanline Effect */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%,
+                    rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg,
+                    rgba(255, 0, 0, 0.06),
+                    rgba(0, 255, 0, 0.02),
+                    rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Screen Flicker */
+        @keyframes flicker {
+            0% {
+                opacity: 0.97;
+            }
+
+            5% {
+                opacity: 0.95;
+            }
+
+            10% {
+                opacity: 0.9;
+            }
+
+            15% {
+                opacity: 0.99;
+            }
+
+            30% {
+                opacity: 0.95;
+            }
+
+            50% {
+                opacity: 0.98;
+            }
+
+            60% {
+                opacity: 0.9;
+            }
+
+            70% {
+                opacity: 0.99;
+            }
+
+            80% {
+                opacity: 0.95;
+            }
+
+            90% {
+                opacity: 0.98;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .crt-content {
+            animation: flicker 0.15s infinite;
+        }
+
+        /* Selection highlight */
+        ::selection {
+            background: #33FF00;
+            color: #000;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #000;
+            border: 1px solid rgba(51, 255, 0, 0.2);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #33FF00;
+        }
+    </style>
+  <script type="module" crossorigin src="/takecontrolofyourlife/assets/index-BI-eRkdq.js"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+    <div class="scanlines"></div>
+</body>
+
+</html>
