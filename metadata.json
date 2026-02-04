@@ -1,0 +1,7 @@
+{
+  "name": "HARD RESET - Legacy OS",
+  "description": "A terminal-based interface for the Hard Reset concept, advocating for digital downgrading and intentional living through MS-DOS aesthetics.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
