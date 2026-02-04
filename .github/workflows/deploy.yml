@@ -22,7 +22,7 @@ jobs:
         env:
            # Note: Providing the API key here will expose it in the public bundle.
            # Only do this if you understand the risks or if the key is restricted.
-           # GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
