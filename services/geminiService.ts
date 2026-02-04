@@ -41,4 +41,18 @@ export class LegacyConsultant {
     Use ASCII borders.`;
     return this.consult(prompt);
   }
+  async chat(history: { role: 'user' | 'model', parts: [{ text: string }] }[], message: string, systemInstruction: string) {
+    try {
+      const chatSession = this.ai.models.generativeModel("gemini-3-flash-preview").startChat({
+        history: history,
+        systemInstruction: systemInstruction,
+      });
+
+      const result = await chatSession.sendMessage(message);
+      return result.response.text();
+    } catch (e) {
+      console.error(e);
+      return "ERROR: LINE_NOISE_DETECTED. PLEASE_REDIAL.";
+    }
+  }
 }
