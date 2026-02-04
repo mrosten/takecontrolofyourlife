@@ -154,6 +154,25 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     });
   };
 
+  // Keyboard Interaction
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent interaction if already dialing
+      if (isDialing) return;
+
+      if (/^[0-9]$/.test(e.key)) {
+        handleDial(parseInt(e.key));
+      } else if (e.key === 'Backspace' || e.key === 'Delete') {
+        clear();
+      } else if (e.key === 'Escape') {
+        onBack();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDialing, onBack]); // isDialing dependency ensures we don't queue spins
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-8 animate-in fade-in">
       <h2 className="text-3xl underline mb-8 tracking-widest">ROTARY_EMULATOR.EXE</h2>
