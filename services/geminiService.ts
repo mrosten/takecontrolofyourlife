@@ -18,12 +18,15 @@ export class LegacyConsultant {
   async consult(prompt: string) {
     try {
       const response = await this.ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         contents: prompt,
         config: { systemInstruction: SYSTEM_INSTRUCTION, temperature: 0.7 },
       });
       return response.text;
-    } catch (e) { return "ERROR: CONNECTION_TIMEOUT."; }
+    } catch (e) {
+      console.error("Gemini Error:", e);
+      return "ERROR: CONNECTION_TIMEOUT.";
+    }
   }
 
   async generateMap(city: string) {
@@ -41,17 +44,26 @@ export class LegacyConsultant {
     Use ASCII borders.`;
     return this.consult(prompt);
   }
+
   async chat(history: { role: 'user' | 'model', parts: [{ text: string }] }[], message: string, systemInstruction: string) {
     try {
-      const chatSession = this.ai.models.generativeModel("gemini-3-flash-preview").startChat({
-        history: history,
-        systemInstruction: systemInstruction,
+      // Create a new client for specific chat request if needed, or use shared
+      // Check if using @google/genai SDK format
+      const response = await this.ai.models.generateContent({
+        model: "gemini-1.5-flash",
+        contents: [
+          { role: "system", parts: [{ text: systemInstruction }] },
+          ...history,
+          { role: "user", parts: [{ text: message }] }
+        ]
       });
 
-      const result = await chatSession.sendMessage(message);
-      return result.response.text();
+      // Note: The new SDK stateless usage might be safer than stateful chat for this simple app
+      // But let's stick to simple generation if easier
+
+      return response.text();
     } catch (e) {
-      console.error(e);
+      console.error("Gemini Chat Error:", e);
       return "ERROR: LINE_NOISE_DETECTED. PLEASE_REDIAL.";
     }
   }
