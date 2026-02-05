@@ -324,11 +324,6 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         // Wait for the return animation to finish (600ms) before playing the tone/connecting
         // This simulates the "pulse" happening during the return
-
-        const match = DIRECTORY.find(d => d.number === newNum);
-        if (match || newNum === "0") {
-          setTimeout(() => tryConnect(newNum), 1000); // Slightly longer delay
-        }
       }
 
       // --- Return Sound Logic ---
@@ -516,6 +511,7 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       <div className="mt-8 flex space-x-8 z-10">
         <button onClick={() => { setNumber(''); playClick(); }} className="px-4 py-2 border border-[#33FF00] bg-black/60 hover:bg-[#33FF00] hover:text-black transition-colors text-sm uppercase tracking-wider backdrop-blur-md">Clear Line</button>
+        <button onClick={() => { if (number) tryConnect(number); }} className={`px-4 py-2 border border-[#33FF00] ${number ? 'bg-[#33FF00] text-black hover:bg-[#33FF00]/80' : 'bg-black/60 text-[#33FF00]/30 cursor-not-allowed'} transition-colors text-sm uppercase tracking-wider backdrop-blur-md`}>CALL</button>
         <button onClick={onBack} className="px-4 py-2 border border-[#33FF00] bg-black/60 hover:bg-[#33FF00] hover:text-black transition-colors text-sm uppercase tracking-wider backdrop-blur-md">Disconnect</button>
       </div>
       <div className="mt-4 text-xs text-[#33FF00]/60 font-mono z-10 bg-black/40 px-2 rounded">DRAG TO DIAL | 0 FOR OPERATOR</div>
