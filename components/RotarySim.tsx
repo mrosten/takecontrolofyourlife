@@ -252,6 +252,28 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     setDragState({ active: true, digit, startAngle: currentAngle, maxRotation: maxRot });
   };
 
+  const playMechanicalClick = useCallback(() => {
+    const ctx = audioCtxRef.current;
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    // High pitch, short burst for plastic/metal click
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.type = 'sawtooth';
+
+    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.03);
+  }, []);
+
+  const lastClickRef = useRef(0);
+
   useEffect(() => {
     const handleMove = (e: MouseEvent | TouchEvent) => {
       if (!dragState.active) return;
@@ -270,6 +292,12 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       if (newRot < 0) newRot = 0; // No backward drag
       if (newRot > dragState.maxRotation) newRot = dragState.maxRotation;
+
+      // Click logic: Tick every 20 degrees
+      if (Math.abs(newRot - lastClickRef.current) > 20) {
+        playMechanicalClick();
+        lastClickRef.current = newRot;
+      }
 
       currentRotationRef.current = newRot;
       setRotation(newRot);
