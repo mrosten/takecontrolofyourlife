@@ -66,9 +66,13 @@ export class LegacyConsultant {
       const result = await chat.sendMessage(message);
       const response = await result.response;
       return response.text();
-    } catch (e) {
+    } catch (e: any) {
       console.error("Gemini Chat Error:", e);
-      return "ERROR: LINE_NOISE_DETECTED. PLEASE_REDIAL.";
+      // Return the actual error to help debugging (especially for API Key issues)
+      const errStr = e.toString();
+      if (errStr.includes("API key")) return "ERROR: INVALID_API_KEY_DETECTED.";
+      if (errStr.includes("400")) return "ERROR: BAD_REQUEST_SIGNAL.";
+      return `ERROR: ${e.message || "LINE_NOISE_DETECTED"}.`;
     }
   }
 }

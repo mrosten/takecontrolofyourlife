@@ -373,32 +373,40 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   if (mode === 'CONNECTED') {
     return (
       <div className="flex flex-col h-full items-center p-4 animate-in fade-in duration-500 relative">
-        <div className="absolute top-0 w-full text-center border-b border-[#33FF00]/30 py-2 text-xs spacing-widest">
+        <div className="absolute top-0 w-full text-center border-b border-[#33FF00]/30 py-2 text-xs spacing-widest z-10 bg-black/80 backdrop-blur-sm">
           CONNECTED: {currentPersona?.number} // {currentPersona?.name}
         </div>
 
+        {/* Spacer for header */}
+        <div className="h-8 shrink-0"></div>
+
         {/* Simulated Oscilloscope Voice Visualizer */}
-        <div className="h-24 w-full flex items-center justify-center space-x-1 my-4">
+        <div className="h-16 w-full flex items-center justify-center space-x-1 my-2 shrink-0">
           {isAiTyping ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
             <div key={i} className="w-2 bg-[#33FF00]" style={{ height: `${Math.random() * 80 + 20}%`, animation: `pulse 0.${i}s infinite` }}></div>
           )) : <div className="w-full h-1 bg-[#33FF00]/20"></div>}
         </div>
 
-        {/* Transcript */}
-        <div ref={scrollRef} className="flex-1 w-full overflow-y-auto border-x border-[#33FF00]/20 p-4 space-y-4 mb-4 custom-scrollbar">
-          {chatHistory.slice(1).map((msg, i) => ( // Skip initial empty/hello trigger if hidden
-            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] p-2 border ${msg.role === 'user' ? 'border-[#33FF00] text-right' : 'border-white/50 text-[#33FF00]'}`}>
-                <span className="text-[10px] opacity-50 block mb-1">{msg.role === 'user' ? 'YOU' : 'VOICE'}</span>
-                {msg.parts[0].text}
+        {/* Transcript - Flex Grow and Scroll */}
+        <div className="flex-1 w-full overflow-y-auto border-x border-[#33FF00]/20 p-2 space-y-4 mb-2 custom-scrollbar min-h-0 flex flex-col-reverse">
+          {/* Note: reversed flex direction keeps content bottom-anchored, but we need to reverse array map too if we use this method. 
+                Instead, let's stick to standard direction but auto-scroll. */}
+          <div className="flex flex-col justify-end min-h-full">
+            {chatHistory.slice(1).map((msg, i) => (
+              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} mb-2`}>
+                <div className={`max-w-[85%] p-2 border ${msg.role === 'user' ? 'border-[#33FF00] text-right' : 'border-white/50 text-[#33FF00]'}`}>
+                  <span className="text-[10px] opacity-50 block mb-1">{msg.role === 'user' ? 'YOU' : 'VOICE'}</span>
+                  {msg.parts[0].text}
+                </div>
               </div>
-            </div>
-          ))}
-          {isAiTyping && <div className="text-xs opacity-50 animate-pulse">VOICE DETECTED...</div>}
+            ))}
+            {isAiTyping && <div className="text-xs opacity-50 animate-pulse mt-2">VOICE DETECTED...</div>}
+            <div ref={scrollRef} />
+          </div>
         </div>
 
         {/* Input */}
-        <div className="w-full flex space-x-2">
+        <div className="w-full flex space-x-2 shrink-0 mb-safe">
           <input
             value={userInput}
             onChange={e => setUserInput(e.target.value)}

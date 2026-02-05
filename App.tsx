@@ -73,7 +73,7 @@ const App: React.FC = () => {
     <div className="h-screen w-screen bg-black text-[#33FF00] p-2 md:p-4 selection:bg-[#33FF00] selection:text-black crt-content overflow-hidden flex flex-col">
       <div className="flex-1 border-2 border-[#33FF00] p-4 md:p-6 flex flex-col relative shadow-[0_0_50px_rgba(51,255,0,0.1)] overflow-hidden">
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+        <div className="flex-1 overflow-hidden relative flex flex-col">
           {currentView === 'BOOT' && <BootSequence onComplete={() => setCurrentView('MAIN')} />}
           {currentView === 'MAIN' && <MainMenu onNavigate={navigate} />}
           {currentView === 'DIRECTORY' && <Directory onBack={goBack} />}
