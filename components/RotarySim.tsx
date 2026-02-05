@@ -291,22 +291,31 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full py-4 animate-in fade-in select-none relative">
-      <button onClick={() => setMode('DIRECTORY')} className="absolute top-0 right-0 border border-[#33FF00] p-2 hover:bg-[#33FF00] hover:text-black text-xs flex flex-col items-center">
-        <span className="text-xl">📒</span>
-        <span>DIR</span>
+    <div className="flex flex-col items-center justify-center h-full py-4 animate-in fade-in select-none relative bg-cover bg-center rounded-xl overflow-hidden shadow-2xl"
+      style={{ backgroundImage: "url('./desk_bg.png')" }}>
+
+      <div className="absolute inset-0 bg-black/40 pointer-events-none"></div>
+
+      <button onClick={() => setMode('DIRECTORY')} className="absolute top-8 right-8 w-24 h-32 bg-[#e8cd9c] bg-opacity-90 rounded-sm shadow-[5px_5px_10px_rgba(0,0,0,0.8)] border border-[#8B4513] flex flex-col items-center justify-center p-2 transform rotate-2 hover:rotate-0 transition-transform cursor-pointer group z-20">
+        <div className="w-full h-full border border-dashed border-[#8B4513]/50 flex items-center justify-center relative">
+          <span className="text-[#8B4513] font-bold text-xs absolute top-2">CONFIDENTIAL</span>
+          <span className="text-black font-serif text-3xl group-hover:scale-110 transition-transform">📒</span>
+          <span className="absolute bottom-2 text-[10px] text-black/70 font-mono">DIR.TXT</span>
+        </div>
       </button>
 
-      <h2 className="text-3xl underline mb-4 tracking-widest">ROTARY_EMULATOR.EXE</h2>
+      <div className="z-10 bg-black/80 p-2 border border-[#33FF00]/50 backdrop-blur-sm mb-4 rounded">
+        <h2 className="text-xl md:text-2xl font-bold tracking-widest text-[#33FF00] drop-shadow-[0_0_5px_rgba(51,255,0,0.8)]">ROTARY_EMULATOR.EXE</h2>
+      </div>
 
-      <div className="bg-[#111] border-2 border-[#33FF00] px-6 py-4 mb-8 min-w-[300px] text-center shadow-[0_0_15px_rgba(51,255,0,0.2)]">
+      <div className="bg-[#111] border-2 border-[#33FF00] px-6 py-4 mb-4 min-w-[300px] text-center shadow-[0_0_15px_rgba(51,255,0,0.2)] z-10">
         <div className="font-mono text-4xl text-[#33FF00] tracking-[0.2em] h-12">
           {number || <span className="text-[#33FF00]/30 animate-pulse">NO_CARRIER</span>}
         </div>
       </div>
 
       {/* Main Dial Container - Fixed Aspect Ratio */}
-      <div className="relative w-[320px] aspect-square rounded-full flex items-center justify-center" ref={dialRef} style={{ touchAction: 'none' }}>
+      <div className="relative w-[320px] aspect-square rounded-full flex items-center justify-center bg-black/20 backdrop-blur-[2px] rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10" ref={dialRef} style={{ touchAction: 'none' }}>
 
         {/* Backplate (Static Numbers) */}
         <div className="absolute inset-0 rounded-full border-4 border-[#33FF00]/30 bg-[#050505] shadow-[inset_0_0_20px_rgba(51,255,0,0.1)]">
@@ -329,11 +338,11 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         </div>
       </div>
 
-      <div className="mt-12 flex space-x-8">
-        <button onClick={() => { setNumber(''); playClick(); }} className="px-4 py-2 border border-[#33FF00] hover:bg-[#33FF00] hover:text-black transition-colors text-sm uppercase tracking-wider">Clear Line</button>
-        <button onClick={onBack} className="px-4 py-2 border border-[#33FF00] hover:bg-[#33FF00] hover:text-black transition-colors text-sm uppercase tracking-wider">Disconnect</button>
+      <div className="mt-8 flex space-x-8 z-10">
+        <button onClick={() => { setNumber(''); playClick(); }} className="px-4 py-2 border border-[#33FF00] bg-black/60 hover:bg-[#33FF00] hover:text-black transition-colors text-sm uppercase tracking-wider backdrop-blur-md">Clear Line</button>
+        <button onClick={onBack} className="px-4 py-2 border border-[#33FF00] bg-black/60 hover:bg-[#33FF00] hover:text-black transition-colors text-sm uppercase tracking-wider backdrop-blur-md">Disconnect</button>
       </div>
-      <div className="mt-4 text-xs text-[#33FF00]/40 font-mono">DRAG TO DIAL | 0 FOR OPERATOR</div>
+      <div className="mt-4 text-xs text-[#33FF00]/60 font-mono z-10 bg-black/40 px-2 rounded">DRAG TO DIAL | 0 FOR OPERATOR</div>
     </div>
   );
 };
