@@ -19,7 +19,7 @@ export class LegacyConsultant {
     }
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({
-      model: "gemini-1.5-flash-001",
+      model: "gemini-1.5-flash",
       systemInstruction: SYSTEM_INSTRUCTION
     });
   }
@@ -55,7 +55,7 @@ export class LegacyConsultant {
     try {
       // For chat, we can instantiate a specific model with the persona instructions
       const chatModel = this.genAI.getGenerativeModel({
-        model: "gemini-1.5-flash-001",
+        model: "gemini-1.5-flash",
         systemInstruction: systemInstruction
       });
 

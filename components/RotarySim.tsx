@@ -467,16 +467,11 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       <div className="absolute inset-0 bg-black/40 pointer-events-none"></div>
 
-      <button onClick={() => setMode('DIRECTORY')} className="absolute bottom-20 right-4 w-20 h-28 md:w-24 md:h-32 bg-[#e8cd9c] bg-opacity-90 rounded-sm shadow-[5px_5px_10px_rgba(0,0,0,0.8)] border border-[#8B4513] flex flex-col items-center justify-center p-2 transform -rotate-12 hover:rotate-0 transition-transform cursor-pointer group z-20">
-        <div className="w-full h-full border border-dashed border-[#8B4513]/50 flex items-center justify-center relative">
-          <span className="text-[#8B4513] font-bold text-[10px] absolute top-1">CONFIDENTIAL</span>
-          <span className="text-black font-serif text-2xl group-hover:scale-110 transition-transform">📒</span>
-          <span className="absolute bottom-1 text-[8px] text-black/70 font-mono">DIR.TXT</span>
-        </div>
-      </button>
-
-      <div className="z-10 bg-black/80 p-2 border border-[#33FF00]/50 backdrop-blur-sm mb-8 rounded mt-8">
-        <h2 className="text-xl md:text-2xl font-bold tracking-widest text-[#33FF00] drop-shadow-[0_0_5px_rgba(51,255,0,0.8)]">ROTARY_EMULATOR.EXE</h2>
+      <div className="z-10 bg-black/80 p-2 border border-[#33FF00]/50 backdrop-blur-sm mb-8 rounded mt-8 flex justify-between items-center w-full max-w-[360px]">
+        <h2 className="text-lg md:text-xl font-bold tracking-widest text-[#33FF00] drop-shadow-[0_0_5px_rgba(51,255,0,0.8)]">ROTARY_EMULATOR</h2>
+        <button onClick={() => setMode('DIRECTORY')} className="text-xs md:text-sm border border-[#33FF00] px-3 py-1 hover:bg-[#33FF00] hover:text-black transition-colors font-mono tracking-wider">
+          [ DIR.TXT ]
+        </button>
       </div>
 
       <div className="bg-[#111] border-2 border-[#33FF00] px-6 py-4 mb-4 min-w-[300px] text-center shadow-[0_0_15px_rgba(51,255,0,0.2)] z-10">
