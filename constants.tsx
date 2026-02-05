@@ -65,11 +65,11 @@ export const SYSTEM_LOGS: LogEntry[] = [
 export const BOOT_SEQUENCE = [
   "640K RAM SYSTEM OK...",
   "ROM BIOS v4.2.0 (C) 1984 HARDRESET INC.",
-  "---------------------------------------------------",
+  "-------------------------------",
   "INITIALIZING PWA CONTAINMENT FIELD...",
   "BLOCKING EXTERNAL PUSH NOTIFICATIONS...",
   "SECURING LOCAL STORAGE VAULT...",
-  "---------------------------------------------------",
+  "-------------------------------",
   "THE RECKONING HAS COMMENCED.",
   "THE GLASS RECTANGLE HAS CONSUMED YOUR YOUTH.",
   "THE ALGORITHM HAS HARVESTED YOUR ATTENTION.",
@@ -94,5 +94,5 @@ export const BOOT_SEQUENCE = [
   "",
   "DISCONNECT TO RECONNECT.",
   "THE HARD RESET IS NOT A CHOICE. IT IS A NECESSITY.",
-  "---------------------------------------------------"
+  "-------------------------------"
 ];

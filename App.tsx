@@ -70,8 +70,8 @@ const App: React.FC = () => {
   }, [currentView]); // Re-bind when view changes to capture correct 'goBack' context
 
   return (
-    <div className="h-screen w-screen bg-black text-[#33FF00] p-2 md:p-4 selection:bg-[#33FF00] selection:text-black crt-content overflow-hidden flex flex-col">
-      <div className="flex-1 border-2 border-[#33FF00] p-4 md:p-6 flex flex-col relative shadow-[0_0_50px_rgba(51,255,0,0.1)] overflow-hidden">
+    <div className="h-[100dvh] w-screen bg-black text-[#33FF00] p-2 md:p-4 selection:bg-[#33FF00] selection:text-black crt-content overflow-hidden flex flex-col box-border">
+      <div className="flex-1 border-2 border-[#33FF00] p-4 md:p-6 flex flex-col relative shadow-[0_0_50px_rgba(51,255,0,0.1)] overflow-hidden box-border">
 
         <div className="flex-1 overflow-hidden relative flex flex-col">
           {currentView === 'BOOT' && <BootSequence onComplete={() => setCurrentView('MAIN')} />}
