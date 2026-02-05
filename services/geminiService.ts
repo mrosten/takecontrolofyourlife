@@ -24,15 +24,38 @@ export class LegacyConsultant {
     });
   }
 
-  async consult(prompt: string) {
+  private async executeWithFallback(action: (model: any) => Promise<string>): Promise<string> {
     try {
-      const result = await this.model.generateContent(prompt);
+      // Attempt 1: Flash
+      return await action(this.model);
+    } catch (e: any) {
+      console.warn("Primary model failed, attempting fallback...", e);
+      try {
+        // Attempt 2: Pro (Fallback)
+        // Re-initialize a fallback model on the fly to ensure clean state
+        const fallbackModel = this.genAI.getGenerativeModel({
+          model: "gemini-1.0-pro",
+          systemInstruction: SYSTEM_INSTRUCTION
+        });
+        return await action(fallbackModel);
+      } catch (fallbackError: any) {
+        console.error("Fallback model also failed:", fallbackError);
+
+        // Detailed Error Reporting
+        const errStr = e.toString() + " | " + fallbackError.toString();
+        if (errStr.includes("API key")) return "ERROR: INVALID_API_KEY.";
+        if (errStr.includes("404")) return "ERROR: MODEL_NOT_FOUND (Check Reg/Name).";
+        return `ERROR: CONNECTION_FAILURE.`;
+      }
+    }
+  }
+
+  async consult(prompt: string) {
+    return this.executeWithFallback(async (model) => {
+      const result = await model.generateContent(prompt);
       const response = await result.response;
       return response.text();
-    } catch (e) {
-      console.error("Gemini Error:", e);
-      return "ERROR: CONNECTION_TIMEOUT.";
-    }
+    });
   }
 
   async generateMap(city: string) {
@@ -52,27 +75,30 @@ export class LegacyConsultant {
   }
 
   async chat(history: { role: 'user' | 'model', parts: [{ text: string }] }[], message: string, systemInstruction: string) {
-    try {
-      // For chat, we can instantiate a specific model with the persona instructions
-      const chatModel = this.genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+    return this.executeWithFallback(async (defaultModel) => {
+      // We ignore defaultModel here because we need to construct a new one with specific systemInstruction
+      // for each persona. But we keep the fallback logic structure.
+
+      const createChatModel = (modelName: string) => this.genAI.getGenerativeModel({
+        model: modelName,
         systemInstruction: systemInstruction
       });
 
-      const chat = chatModel.startChat({
-        history: history,
-      });
-
-      const result = await chat.sendMessage(message);
-      const response = await result.response;
-      return response.text();
-    } catch (e: any) {
-      console.error("Gemini Chat Error:", e);
-      // Return the actual error to help debugging (especially for API Key issues)
-      const errStr = e.toString();
-      if (errStr.includes("API key")) return "ERROR: INVALID_API_KEY_DETECTED.";
-      if (errStr.includes("400")) return "ERROR: BAD_REQUEST_SIGNAL.";
-      return `ERROR: ${e.message || "LINE_NOISE_DETECTED"}.`;
-    }
+      // Try with Primary
+      try {
+        const chatModel = createChatModel("gemini-1.5-flash");
+        const chat = chatModel.startChat({ history });
+        const result = await chat.sendMessage(message);
+        return (await result.response).text();
+      } catch (e) {
+        console.warn("Chat Primary failed, trying fallback...");
+        // Try with Fallback
+        const chatModel = createChatModel("gemini-1.0-pro");
+        const chat = chatModel.startChat({ history });
+        const result = await chat.sendMessage(message);
+        return (await result.response).text();
+      }
+    });
   }
 }
+```
