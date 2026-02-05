@@ -31,6 +31,7 @@ const App: React.FC = () => {
     }
   };
 
+  // Handle ESC key for desktop
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && currentView !== 'BOOT') {
@@ -40,6 +41,24 @@ const App: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentView]);
+
+  // Handle Android Back Button (History API Interception)
+  useEffect(() => {
+    // Push a dummy state when entering a new view (except BOOT/MAIN initial load)
+    if (currentView !== 'BOOT' && currentView !== 'MAIN') {
+      window.history.pushState({ view: currentView }, '');
+    }
+
+    const handlePopState = (event: PopStateEvent) => {
+      // If user presses back, goBack() logic which handles internal history or exits to MAIN
+      // Prevent default behavior effectively by handling the state pop
+      event.preventDefault();
+      goBack();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [currentView]); // Re-bind when view changes to capture correct 'goBack' context
 
   return (
     <div className="h-screen w-screen bg-black text-[#33FF00] p-2 md:p-4 selection:bg-[#33FF00] selection:text-black crt-content overflow-hidden flex flex-col">
