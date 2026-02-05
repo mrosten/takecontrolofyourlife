@@ -1,5 +1,5 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const SYSTEM_INSTRUCTION = `
 You are the "Hard Reset" Legacy Consultant. 
@@ -9,20 +9,26 @@ Use ASCII bullet points, plain text, and NO EMOJIS.
 `;
 
 export class LegacyConsultant {
-  private ai: any;
+  private genAI: GoogleGenerativeAI;
+  private model: any;
 
   constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
+    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY || "";
+    if (!apiKey) {
+      console.warn("LegacyConsultant: No API Key found.");
+    }
+    this.genAI = new GoogleGenerativeAI(apiKey);
+    this.model = this.genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: SYSTEM_INSTRUCTION
+    });
   }
 
   async consult(prompt: string) {
     try {
-      const response = await this.ai.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: prompt,
-        config: { systemInstruction: SYSTEM_INSTRUCTION, temperature: 0.7 },
-      });
-      return response.text;
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
     } catch (e) {
       console.error("Gemini Error:", e);
       return "ERROR: CONNECTION_TIMEOUT.";
@@ -47,20 +53,18 @@ export class LegacyConsultant {
 
   async chat(history: { role: 'user' | 'model', parts: [{ text: string }] }[], message: string, systemInstruction: string) {
     try {
-      // Create a new client for specific chat request if needed, or use shared
-      // Check if using @google/genai SDK format
-      const response = await this.ai.models.generateContent({
+      // For chat, we can instantiate a specific model with the persona instructions
+      const chatModel = this.genAI.getGenerativeModel({
         model: "gemini-1.5-flash",
-        contents: [
-          { role: "system", parts: [{ text: systemInstruction }] },
-          ...history,
-          { role: "user", parts: [{ text: message }] }
-        ]
+        systemInstruction: systemInstruction
       });
 
-      // Note: The new SDK stateless usage might be safer than stateful chat for this simple app
-      // But let's stick to simple generation if easier
+      const chat = chatModel.startChat({
+        history: history,
+      });
 
+      const result = await chat.sendMessage(message);
+      const response = await result.response;
       return response.text();
     } catch (e) {
       console.error("Gemini Chat Error:", e);
