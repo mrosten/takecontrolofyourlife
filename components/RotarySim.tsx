@@ -252,24 +252,35 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     setDragState({ active: true, digit, startAngle: currentAngle, maxRotation: maxRot });
   };
 
-  const playMechanicalClick = useCallback(() => {
+  const playMechanicalClick = useCallback((variability = false) => {
     const ctx = audioCtxRef.current;
     if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    // High pitch, short burst for plastic/metal click
-    osc.frequency.setValueAtTime(800, ctx.currentTime);
-    osc.type = 'sawtooth';
+    // Lower frequency for a duller "clack"
+    // Add slight random detuning if requested for realism
+    const baseFreq = 220;
+    const freq = variability ? baseFreq + (Math.random() * 50 - 25) : baseFreq;
 
-    gain.gain.setValueAtTime(0.05, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.type = 'square'; // Square wave is "woodier"
 
-    osc.connect(gain);
+    // Very short, percussive envelope
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.02);
+
+    // Lowpass filter to remove harsh high-end "beepiness"
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 1000;
+
+    osc.connect(filter);
+    filter.connect(gain);
     gain.connect(ctx.destination);
 
     osc.start();
-    osc.stop(ctx.currentTime + 0.03);
+    osc.stop(ctx.currentTime + 0.02);
   }, []);
 
   const lastClickRef = useRef(0);
@@ -282,20 +293,17 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       const angle = getPointerAngle(e);
       let delta = angle - lastAngleRef.current;
 
-      // Robust wrap handling for continuous rotation tracking
       if (delta < -180) delta += 360;
       if (delta > 180) delta -= 360;
 
       lastAngleRef.current = angle;
-
       let newRot = currentRotationRef.current + delta;
-
-      if (newRot < 0) newRot = 0; // No backward drag
+      if (newRot < 0) newRot = 0;
       if (newRot > dragState.maxRotation) newRot = dragState.maxRotation;
 
-      // Click logic: Tick every 20 degrees
-      if (Math.abs(newRot - lastClickRef.current) > 20) {
-        playMechanicalClick();
+      // Click logic: Tick every 15 degrees for finer granularity
+      if (Math.abs(newRot - lastClickRef.current) > 15) {
+        playMechanicalClick(true);
         lastClickRef.current = newRot;
       }
 
@@ -308,17 +316,41 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       // Verification logic: did we rotate enough?
       const threshold = Math.max(dragState.maxRotation * 0.85, 30);
+      const isDialing = rotation > threshold && dragState.digit !== null;
 
-      if (rotation > threshold && dragState.digit !== null) {
-        const newNum = (number + dragState.digit.toString()).slice(-10);
+      if (isDialing) {
+        const newNum = (number + dragState.digit!.toString()).slice(-10);
         setNumber(newNum);
-        playTone(dragState.digit);
+
+        // Wait for the return animation to finish (600ms) before playing the tone/connecting
+        // This simulates the "pulse" happening during the return
 
         const match = DIRECTORY.find(d => d.number === newNum);
         if (match || newNum === "0") {
-          setTimeout(() => tryConnect(newNum), 1000);
+          setTimeout(() => tryConnect(newNum), 1000); // Slightly longer delay
         }
       }
+
+      // --- Return Sound Logic ---
+      // The dial returns in ~600ms (CSS transition). We want a rapid "zrrrrt"
+      if (rotation > 20) {
+        const startTime = audioCtxRef.current?.currentTime || 0;
+        const duration = 0.6; // Matches CSS
+        const clicks = 10; // Number of clicks in return
+
+        for (let i = 0; i < clicks; i++) {
+          setTimeout(() => {
+            // Return clicks are uniform and faster
+            playMechanicalClick(false);
+          }, (i / clicks) * (duration * 1000));
+        }
+
+        // Play the DTMF tone AFTER it returns, simulating pulse dialing completing
+        if (isDialing && dragState.digit !== null) {
+          setTimeout(() => playTone(dragState.digit!), 600);
+        }
+      }
+
       setDragState(prev => ({ ...prev, active: false, digit: null }));
       setRotation(0);
       currentRotationRef.current = 0;
