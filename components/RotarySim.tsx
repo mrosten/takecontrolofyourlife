@@ -54,6 +54,8 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const consultant = useRef(new LegacyConsultant());
 
+  const ambientNodesRef = useRef<any[]>([]);
+
   // Audio Init
   const initAudio = useCallback(() => {
     if (!audioCtxRef.current) {
@@ -61,6 +63,85 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     }
     if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume();
   }, []);
+
+  const createNoise = (ctx: AudioContext) => {
+    const bufferSize = 2 * ctx.sampleRate;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const output = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      output[i] = (lastOut + (0.02 * white)) / 1.02; // Brown noise approximation
+      lastOut = output[i];
+      output[i] *= 3.5;
+    }
+    return buffer;
+  }
+  let lastOut = 0;
+
+  const startAmbient = (personaName: string) => {
+    const ctx = audioCtxRef.current;
+    if (!ctx) return;
+    stopAmbient(); // Clear existing
+
+    const gain = ctx.createGain();
+    gain.connect(ctx.destination);
+    ambientNodesRef.current.push(gain);
+
+    if (personaName === 'THE_VOID') {
+      // Deep Brown Noise
+      const buffer = createNoise(ctx);
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+      gain.gain.value = 0.15;
+      noise.connect(gain);
+      noise.start();
+      ambientNodesRef.current.push(noise);
+    } else if (personaName === 'TIME') {
+      // Ticking Clock
+      const osc = ctx.createOscillator();
+      osc.type = 'square';
+      osc.frequency.value = 4; // 4hz tick
+      const tickGain = ctx.createGain();
+      tickGain.gain.value = 0.05;
+      osc.connect(tickGain).connect(ctx.destination);
+      osc.start();
+      ambientNodesRef.current.push(osc, tickGain);
+    } else if (personaName === 'OPERATOR') {
+      // Low hum + static
+      const osc = ctx.createOscillator();
+      osc.frequency.value = 60; // Mains hum
+      gain.gain.value = 0.05;
+      osc.connect(gain);
+      osc.start();
+      ambientNodesRef.current.push(osc);
+    } else {
+      // Default: Faint line hiss
+      const osc = ctx.createOscillator();
+      osc.frequency.value = 400; // Line tone
+      gain.gain.value = 0.005;
+      osc.connect(gain);
+      osc.start();
+      ambientNodesRef.current.push(osc);
+    }
+  };
+
+  const stopAmbient = () => {
+    ambientNodesRef.current.forEach(node => {
+      try { node.stop && node.stop(); node.disconnect && node.disconnect(); } catch (e) { }
+    });
+    ambientNodesRef.current = [];
+  };
+
+  // Trigger Ambience based on Mode
+  useEffect(() => {
+    if (mode === 'CONNECTED' && currentPersona) {
+      startAmbient(currentPersona.name);
+    } else {
+      stopAmbient();
+    }
+    return () => stopAmbient();
+  }, [mode, currentPersona]);
 
   const playClick = useCallback(() => {
     const ctx = audioCtxRef.current;
@@ -336,8 +417,8 @@ const RotarySim: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       </div>
 
       <div className="bg-[#111] border-2 border-[#33FF00] px-6 py-4 mb-4 min-w-[300px] text-center shadow-[0_0_15px_rgba(51,255,0,0.2)] z-10">
-        <div className="font-mono text-4xl text-[#33FF00] tracking-[0.2em] h-12">
-          {number || <span className="text-[#33FF00]/30 animate-pulse">NO_CARRIER</span>}
+        <div className="font-mono text-4xl text-[#33FF00] tracking-[0.2em] h-12 flex items-center justify-center">
+          {number ? number : <span className="animate-pulse">_</span>}
         </div>
       </div>
 
