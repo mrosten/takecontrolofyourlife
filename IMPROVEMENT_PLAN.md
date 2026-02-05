@@ -3,33 +3,33 @@
 User Goal: Transform the app from a tech demo into an atmospheric, immersive experience for mobile/PWA.
 
 ## 1. Boot Sequence Narrative (Context)
-- [ ] Create `components/BootSequence.tsx`.
-- [ ] Implement retro "BIOS start" text animation.
-- [ ] Integrate into `App.tsx` to run on initial load.
-- [ ] *Status: Pending*
+- [x] Create `components/BootSequence.tsx`.
+- [x] Implement retro "BIOS start" text animation.
+- [x] Integrate into `App.tsx` to run on initial load.
+- [x] *Status: Done*
 
 ## 2. Physical Desk UI (Visuals)
-- [ ] Generate background image: "Cyber-Noir Detective Desk".
-- [ ] Update main layout to use background.
-- [ ] Re-style "Directory" as a physical notebook object on the desk.
-- [ ] Re-style "Hang Up" as a physical interaction (or phone cradle).
-- [ ] *Status: Pending*
+- [x] Generate background image: "Cyber-Noir Detective Desk".
+- [x] Update main layout to use background.
+- [x] Re-style "Directory" as a physical notebook object on the desk.
+- [x] Re-style "Hang Up" as a physical interaction (or phone cradle).
+- [x] *Status: Done*
 
 ## 3. "Services" Protocols (Depth)
-- [ ] Refine AI Personas in `DIRECTORY` to have specific goals/games.
-- [ ] Operator: Interrogator/Router.
-- [ ] Speaking Clock: Requires "payment" (memory).
-- [ ] Pizza Place: Order taking script.
-- [ ] *Status: Pending*
+- [x] Refine AI Personas in `DIRECTORY` to have specific goals/games.
+- [x] Operator: Interrogator/Router.
+- [x] Speaking Clock: Requires "payment" (memory).
+- [x] Pizza Place: Order taking script.
+- [x] *Status: Done*
 
 ## 4. Redacted Directory (Gamification)
-- [ ] Add "Hidden" numbers (e.g. 888) not visible in the UI.
-- [ ] Update `tryConnect` to handle hidden numbers.
-- [ ] Update Operator persona to hint at secret numbers.
-- [ ] *Status: Pending*
+- [x] Add "Hidden" numbers (e.g. 888) not visible in the UI.
+- [x] Update `tryConnect` to handle hidden numbers.
+- [x] Update Operator persona to hint at secret numbers.
+- [x] *Status: Done*
 
 ## 5. Ambient Audio Soundscapes (Immersion)
-- [ ] enhance `initAudio` in `RotarySim.tsx` to generate procedural background noise.
-- [ ] Implement Brown Noise for "The Void".
-- [ ] Implement office hum/static for "Operator".
-- [ ] *Status: Pending*
+- [x] enhance `initAudio` in `RotarySim.tsx` to generate procedural background noise.
+- [x] Implement Brown Noise for "The Void".
+- [x] Implement office hum/static for "Operator".
+- [x] *Status: Done*
