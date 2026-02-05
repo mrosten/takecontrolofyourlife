@@ -13,8 +13,17 @@ import RotarySim from './components/RotarySim';
 import GridRadar from './components/GridRadar';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<AppState>('BOOT');
+  const [currentView, setCurrentView] = useState<AppState>(() => {
+    const saved = localStorage.getItem('HARD_RESET_VIEW');
+    return (saved as AppState) || 'BOOT';
+  });
   const [history, setHistory] = useState<AppState[]>([]);
+
+  useEffect(() => {
+    if (currentView !== 'BOOT') {
+      localStorage.setItem('HARD_RESET_VIEW', currentView);
+    }
+  }, [currentView]);
 
   const navigate = (view: AppState) => {
     setHistory(prev => [...prev, currentView]);
